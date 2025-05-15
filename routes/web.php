@@ -1,30 +1,43 @@
 <?php
 
 use App\Http\Controllers\WelcomeController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\StokController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', [WelcomeController::class,'index']);
+Route::pattern('id', '[0-9]+');                                                         // Artinya ketika ada parameter {id}, maka harus berupa angka
 
-Route::group(['prefix' => 'user'], function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::post('/list', [UserController::class, 'list']);
-    Route::get('/create', [UserController::class, 'create']);
-    Route::post('/', [UserController::class, 'store']);
-    Route::get('/create_ajax', [UserController::class, 'create_ajax']);             
-    Route::post('/ajax', [UserController::class, 'store_ajax']);                    
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::get('/{id}/edit', [UserController::class, 'edit']);
-    Route::put('/{id}', [UserController::class, 'update']);
-    Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);
-    Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);
-    Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);       
-    Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);
-    Route::delete('/{id}', [UserController::class, 'destroy']);
+Route::get('login', [AuthController::class, 'login'])->name('login');
+Route::post('login', [AuthController::class, 'postlogin']);
+Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
+Route::get('register', [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'PostRegister']);
+
+Route::middleware(['auth'])->group(function(){
+    Route::get('/', [WelcomeController::class, 'index']);
+
+    Route::group(['prefix' => 'user'], function () {
+        Route::middleware(['authorize:ADM'])->group(function (){
+            Route::get('/', [UserController::class, 'index']);                              // menampilkan halaman awal user
+            Route::post('/list', [UserController::class, 'list']);                          // menampilkan data user dalam bentuk json untuk datatables
+            Route::get('/create', [UserController::class, 'create']);                       // menampilkan halaman form tambah user
+            Route::post('/', [UserController::class, 'store']);                             // menyimpan data user baru
+            Route::get('/create_ajax', [UserController::class, 'create_ajax']);             // menampilkan halaman form tambah user Ajax
+            Route::post('/ajax', [UserController::class, 'store_ajax']);                    // menyimpan data user baru Ajax
+            Route::get('/{id}', [UserController::class, 'show']);                           // menampilkan detail user
+            Route::get('/{id}/edit', [UserController::class, 'edit']);                      // menampilkan halaman form edit user
+            Route::put('/{id}', [UserController::class, 'update']);                         // menyimpan perubahan data user
+            Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);            // menampilkan halaman form edit user AJax
+            Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);        // menyimpan perubahan data user Ajax
+            Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);       // untuk tampilkan form confirm delete user Ajax
+            Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);     // untuk hapus data user Ajax
+            Route::delete('/{id}', [UserController::class, 'destroy']);                     // menghapus data user
+        });
+    }); 
 });
 
 Route::group(['prefix' => 'level'], function () {
