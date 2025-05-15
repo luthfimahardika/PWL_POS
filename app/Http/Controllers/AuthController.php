@@ -36,7 +36,7 @@ class AuthController extends Controller
 
         return redirect('login');
     }
-    
+
     public function logout(Request $request)
     {
         Auth::logout();
@@ -71,4 +71,3 @@ class AuthController extends Controller
         return redirect('login')->with('success', 'Registrasti berhasil ditambahkan');
     }
 }
-
